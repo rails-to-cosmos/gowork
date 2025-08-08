@@ -3,6 +3,7 @@ package main
 import (
     "bytes"
     "encoding/json"
+    "flag"
     "fmt"
     "io"
     "log"
@@ -15,7 +16,6 @@ import (
 
 // ProcessStatus defines the possible states of the managed process.
 type ProcessStatus string
-
 const (
     StatusNotStarted ProcessStatus = "not_started"
     StatusRunning    ProcessStatus = "running"
@@ -212,33 +212,34 @@ func makeLogHandler(pm *ProcessManager) http.HandlerFunc {
 }
 
 func main() {
-    if len(os.Args) < 2 {
-        log.Fatal("Usage: gowork <executable_path> [arg1] [arg2] ...")
+    port := flag.String("port", "8080", "Port for the web server")
+	flag.Parse()
+
+	args := flag.Args()
+    if len(args) < 1 {
+        log.Fatal("Usage: gowork -port <port> <executable_path> [arg1] [arg2] ...")
     }
-    executablePath := os.Args[1]
-    args := os.Args[2:]
+	executablePath := args[0]
+	executableArgs := args[1:]
 
-    if _, err := os.Stat(executablePath); os.IsNotExist(err) {
-        log.Fatalf("Executable file not found at: %s", executablePath)
-    }
+	if _, err := os.Stat(executablePath); os.IsNotExist(err) {
+		log.Fatalf("Executable file not found at: %s", executablePath)
+	}
 
-    log.Printf("Managing executable: %s with args: %v", executablePath, args)
-    manager := NewProcessManager(executablePath, args)
+	log.Printf("Managing executable: %s with args: %v", executablePath, executableArgs)
+	manager := NewProcessManager(executablePath, executableArgs)
 
-    // Automatically start the process on launch.
-    if err := manager.Start(); err != nil {
-        log.Printf("Initial start failed: %v", err)
-    }
+	if err := manager.Start(); err != nil {
+		log.Printf("Initial start failed: %v", err)
+	}
 
-    http.HandleFunc("/status", makeStatusHandler(manager))
-    http.HandleFunc("/start", makeStartHandler(manager))
-    http.HandleFunc("/stop", makeStopHandler(manager))
-    http.HandleFunc("/exit", makeExitHandler(manager))
-    http.HandleFunc("/logs", makeLogHandler(manager))
+	http.HandleFunc("/status", makeStatusHandler(manager))
+	http.HandleFunc("/start", makeStartHandler(manager))
+	http.HandleFunc("/stop", makeStopHandler(manager))
+	http.HandleFunc("/log", makeLogHandler(manager))
 
-    port := "8080"
-    log.Printf("Starting server on port %s...", port)
-    if err := http.ListenAndServe(":"+port, nil); err != nil {
-        log.Fatalf("Failed to start server: %v", err)
-    }
+	log.Printf("Starting server on port %s...", *port)
+	if err := http.ListenAndServe(":" + *port, nil); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
