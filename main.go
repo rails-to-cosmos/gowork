@@ -213,7 +213,7 @@ func makeLogHandler(pm *ProcessManager) http.HandlerFunc {
 
 func main() {
     if len(os.Args) < 2 {
-        log.Fatal("Usage: go run process_manager.go <executable_path> [arg1] [arg2] ...")
+        log.Fatal("Usage: gowork <executable_path> [arg1] [arg2] ...")
     }
     executablePath := os.Args[1]
     args := os.Args[2:]
