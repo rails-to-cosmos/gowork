@@ -205,7 +205,7 @@ func makeExitHandler(pm *ProcessManager) http.HandlerFunc {
 func makeLogHandler(pm *ProcessManager) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         logs := pm.GetLogs()
-        log.Println("API: /log requested.")
+        log.Println("API: /logs requested.")
         w.Header().Set("Content-Type", "text/plain")
         w.Write([]byte(logs))
     }
@@ -234,7 +234,7 @@ func main() {
     http.HandleFunc("/start", makeStartHandler(manager))
     http.HandleFunc("/stop", makeStopHandler(manager))
     http.HandleFunc("/exit", makeExitHandler(manager))
-    http.HandleFunc("/log", makeLogHandler(manager))
+    http.HandleFunc("/logs", makeLogHandler(manager))
 
     port := "8080"
     log.Printf("Starting server on port %s...", port)
