@@ -237,6 +237,7 @@ func main() {
 	http.HandleFunc("/start", makeStartHandler(manager))
 	http.HandleFunc("/stop", makeStopHandler(manager))
 	http.HandleFunc("/log", makeLogHandler(manager))
+	http.HandleFunc("/exit", makeExitHandler(manager))
 
 	log.Printf("Starting server on port %s...", *port)
 	if err := http.ListenAndServe(":" + *port, nil); err != nil {
